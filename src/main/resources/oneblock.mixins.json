@@ -1,0 +1,28 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "dev.bleach.mixin",
+  "compatibilityLevel": "JAVA_8",
+  "mixins": [
+  ],
+  "client": [
+  	"registry.AccessorBlockEntity",
+  	"registry.AccessorBlockEntityRenderDispatcher",
+  	"registry.AccessorEntityRenderDispatcher",
+  	"registry.MixinClientPlayNetworkHandler",
+  	"registry.MixinTrackedEntityInstance",
+  	
+  	"MixinChestBlock",
+    "MixinHeldItemRenderer",
+    "MixinHungerManager",
+    "MixinInGameHud",
+    "MixinItemStack",
+    "MixinMinecraftClient",
+    "MixinPlayerEntity",
+    "MixinPlayerInventory",
+    "MixinServerPlayerInteractionManager"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
