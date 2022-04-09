@@ -3,13 +3,13 @@
   "id": "oneblock",
   "version": "${version}",
   "name": "One Block (Legacy)",
-  "description": "This is an example description! Tell everyone what your mod is about!",
+  "description": "The 22w13a Minecraft April fools update ported to other versions.",
   "authors": [
-    "Me!"
+    "Bleach"
   ],
   "contact": {
-    "homepage": "https://legacyfabric.net/",
-    "sources": "https://github.com/Legacy-Fabric/fabric-example-mod"
+    "homepage": "-",
+    "sources": "https://github.com/BleachDrinker420/oneblock"
   },
   "license": "MIT",
   "icon": "assets/oneblock/icon.png",
