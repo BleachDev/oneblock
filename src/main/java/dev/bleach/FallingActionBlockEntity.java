@@ -118,7 +118,7 @@ public class FallingActionBlockEntity extends FallingBlockEntity {
 				BlockState state = world.getBlockState(newPos);
 
 				if (!state.getBlock().getMaterial().isReplaceable())
-					items[(y + 1) * 3 + (x + 1)] = OneBlock.stackFromBlock(world.getBlockState(newPos), world.getBlockEntity(pos));
+					items[(y + 1) * 3 + (x + 1)] = OneBlock.stackFromBlock(world.getBlockState(newPos), world.getBlockEntity(newPos));
 			}
 		}
 
