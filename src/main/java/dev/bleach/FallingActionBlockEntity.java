@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.function.Supplier;
 
 import dev.bleach.ItemBlock.ItemBlockEntityRenderer;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BlockEntity;
@@ -16,11 +17,8 @@ import net.minecraft.entity.FallingBlockEntity;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.CraftingInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.recipe.RecipeDispatcher;
-import net.minecraft.screen.ScreenHandler;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Pair;
 import net.minecraft.util.math.BlockPos;
@@ -30,10 +28,6 @@ import net.minecraft.world.World;
 public class FallingActionBlockEntity extends FallingBlockEntity {
 
 	private static Direction[] HORIZONTAL = new Direction[] { Direction.NORTH, Direction.EAST, Direction.SOUTH, Direction.WEST };
-	private static CraftingInventory TEST_INV = new CraftingInventory(new ScreenHandler() {
-		public boolean canUse(PlayerEntity player) { return false; }
-	}, 3, 3);
-
 
 	private List<Entity> inEntities = new ArrayList<>();
 
@@ -85,12 +79,22 @@ public class FallingActionBlockEntity extends FallingBlockEntity {
 
 		super.tick();
 
-		if (!this.world.isClient && removed && getBlockState().getBlock() == Blocks.CRAFTING_TABLE) {
+		if (!this.world.isClient && removed) {
+			Block block = getBlockState().getBlock();
 			BlockPos pos = world.getBlockState(getBlockPos()).getBlock() == ItemBlock.BLOCK ? getBlockPos() : getBlockPos().down();
-			for (Direction d: HORIZONTAL) {
-				ItemStack stack = getBlockRecipe(world, pos, d);
+			
+			if (block == Blocks.CRAFTING_TABLE) {
+				for (Direction d: HORIZONTAL) {
+					ItemStack stack = RecipeHelper.getBlockRecipe(world, pos, d);
+					if (stack != null) {
+						replaceBlocks(world, pos, OneBlock.stateFromStack(world, stack));
+						return;
+					}
+				}
+			} else if (block == Blocks.FURNACE || block == Blocks.LIT_FURNACE) {
+				ItemStack stack = RecipeHelper.getFurnaceBlockRecipe(world, pos);
 				if (stack != null) {
-					replaceBlocks(world, pos, OneBlock.stateFromStack(world, stack));
+					replaceBlock(world, pos, OneBlock.stateFromStack(world, stack));
 					return;
 				}
 			}
@@ -110,41 +114,22 @@ public class FallingActionBlockEntity extends FallingBlockEntity {
 		return super.dropItem(stack, yOffset);
 	}
 
-	private ItemStack getBlockRecipe(World world, BlockPos pos, Direction direction) {
-		ItemStack[] items = new ItemStack[9];
-		for (int y = -1; y <= 1; y++) {
-			for (int x = -1; x <= 1; x++) {
-				BlockPos newPos = pos.offset(direction, x).offset(direction.rotateYClockwise(), y);
-				BlockState state = world.getBlockState(newPos);
-
-				if (!state.getBlock().getMaterial().isReplaceable())
-					items[(y + 1) * 3 + (x + 1)] = OneBlock.stackFromBlock(world.getBlockState(newPos), world.getBlockEntity(newPos));
-			}
-		}
-
-		return getRecipe(world, items);
-	}
-
-	private ItemStack getRecipe(World world, ItemStack... items) {
-		for (int i = 0; i < items.length; i++)
-			TEST_INV.setInvStack(i, items[i]);
-
-		return RecipeDispatcher.getInstance().matches(TEST_INV, world);
-	}
-
 	private void replaceBlocks(World world, BlockPos pos, Pair<BlockState, Supplier<BlockEntity>> state) {
 		for (int y = -1; y <= 1; y++) {
 			for (int x = -1; x <= 1; x++) {
 				BlockPos newPos = pos.add(x, 0, y);
-				BlockState oldState = world.getBlockState(newPos);
-				if (!oldState.getBlock().getMaterial().isReplaceable()) {
-					world.setBlockState(newPos, Blocks.AIR.getDefaultState());
-					world.setBlockState(newPos, state.getLeft());
-					if (state.getRight() != null)
-						world.setBlockEntity(newPos, state.getRight().get());
+				if (!world.getBlockState(newPos).getBlock().getMaterial().isReplaceable()) {
+					replaceBlock(world, newPos, state);
 				}
 			}
 		}
+	}
+	
+	private void replaceBlock(World world, BlockPos pos, Pair<BlockState, Supplier<BlockEntity>> state) {
+		world.setBlockState(pos, Blocks.AIR.getDefaultState());
+		world.setBlockState(pos, state.getLeft());
+		if (state.getRight() != null)
+			world.setBlockEntity(pos, state.getRight().get());
 	}
 
 	public static class FallingActionBlockEntityRenderer extends EntityRenderer<FallingActionBlockEntity> {
