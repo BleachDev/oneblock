@@ -2,12 +2,16 @@ package dev.bleach;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Supplier;
 
 import dev.bleach.ItemBlock.ItemBlockEntityRenderer;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
+import net.minecraft.block.GlassBlock;
+import net.minecraft.block.PaneBlock;
+import net.minecraft.block.StainedGlassBlock;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.render.entity.EntityRenderDispatcher;
 import net.minecraft.client.render.entity.EntityRenderer;
@@ -95,8 +99,10 @@ public class FallingActionBlockEntity extends FallingBlockEntity {
 				ItemStack stack = RecipeHelper.getFurnaceBlockRecipe(world, pos);
 				if (stack != null) {
 					replaceBlock(world, pos, OneBlock.stateFromStack(world, stack));
-					return;
 				}
+			} else if ((block instanceof GlassBlock || block instanceof StainedGlassBlock || block instanceof PaneBlock) && ThreadLocalRandom.current().nextBoolean()) {
+				world.setBlockState(getBlockPos(), Blocks.AIR.getDefaultState());
+				world.playSound(pos.getX(), pos.getY(), pos.getZ(), block.sound.getSound(), 1f, 1f);
 			}
 		}
 	}
