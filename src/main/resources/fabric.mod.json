@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "oneblock",
   "version": "${version}",
-  "name": "One Block (Legacy)",
+  "name": "One Block",
   "description": "The 22w13a Minecraft April fools update ported to other versions.",
   "authors": [
     "Bleach"
