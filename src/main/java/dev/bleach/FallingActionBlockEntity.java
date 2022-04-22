@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Supplier;
 
+import com.google.common.collect.AbstractIterator;
+
 import dev.bleach.ItemBlock.ItemBlockEntityRenderer;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -12,6 +14,8 @@ import net.minecraft.block.Blocks;
 import net.minecraft.block.GlassBlock;
 import net.minecraft.block.PaneBlock;
 import net.minecraft.block.StainedGlassBlock;
+import net.minecraft.block.StoneSlabBlock;
+import net.minecraft.block.StoneSlabBlock.SlabType;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.render.entity.EntityRenderDispatcher;
 import net.minecraft.client.render.entity.EntityRenderer;
@@ -86,12 +90,16 @@ public class FallingActionBlockEntity extends FallingBlockEntity {
 		if (!this.world.isClient && removed) {
 			Block block = getBlockState().getBlock();
 			BlockPos pos = world.getBlockState(getBlockPos()).getBlock() == ItemBlock.BLOCK ? getBlockPos() : getBlockPos().down();
-			
+
 			if (block == Blocks.CRAFTING_TABLE) {
 				for (Direction d: HORIZONTAL) {
 					ItemStack stack = RecipeHelper.getBlockRecipe(world, pos, d);
 					if (stack != null) {
-						replaceBlocks(world, pos, OneBlock.stateFromStack(world, stack));
+						for (BlockPos p: iterateAround(pos)) {
+							if (!world.getBlockState(p).getBlock().getMaterial().isReplaceable())
+								replaceBlock(world, p, OneBlock.stateFromStack(world, stack));
+						}
+
 						return;
 					}
 				}
@@ -103,6 +111,21 @@ public class FallingActionBlockEntity extends FallingBlockEntity {
 			} else if ((block instanceof GlassBlock || block instanceof StainedGlassBlock || block instanceof PaneBlock) && ThreadLocalRandom.current().nextBoolean()) {
 				world.setBlockState(getBlockPos(), Blocks.AIR.getDefaultState());
 				world.playSound(pos.getX(), pos.getY(), pos.getZ(), block.sound.getSound(), 1f, 1f);
+			} else if (block == Blocks.GRAVEL) {
+				for (BlockPos p: iterateAround(getBlockPos())) {
+					Block b = world.getBlockState(p).getBlock();
+					if (b == Blocks.TALLGRASS || b == Blocks.DOUBLE_PLANT || b == Blocks.VINE)
+						world.setBlockState(p, Blocks.FIRE.getDefaultState());
+				}
+			} else if (block == Blocks.STONE) {
+				for (BlockPos p: iterateAround(getBlockPos())) {
+					if (world.getBlockState(p).getBlock() == Blocks.FIRE) {
+						world.setBlockState(getBlockPos(), Blocks.DOUBLE_STONE_SLAB.getDefaultState()
+								.with(StoneSlabBlock.VARIANT, SlabType.STONE)
+								.with(StoneSlabBlock.SEAMLESS, true));
+						return;
+					}
+				}
 			}
 		}
 	}
@@ -120,22 +143,23 @@ public class FallingActionBlockEntity extends FallingBlockEntity {
 		return super.dropItem(stack, yOffset);
 	}
 
-	private void replaceBlocks(World world, BlockPos pos, Pair<BlockState, Supplier<BlockEntity>> state) {
-		for (int y = -1; y <= 1; y++) {
-			for (int x = -1; x <= 1; x++) {
-				BlockPos newPos = pos.add(x, 0, y);
-				if (!world.getBlockState(newPos).getBlock().getMaterial().isReplaceable()) {
-					replaceBlock(world, newPos, state);
-				}
-			}
-		}
-	}
-	
 	private void replaceBlock(World world, BlockPos pos, Pair<BlockState, Supplier<BlockEntity>> state) {
 		world.setBlockState(pos, Blocks.AIR.getDefaultState());
 		world.setBlockState(pos, state.getLeft());
 		if (state.getRight() != null)
 			world.setBlockEntity(pos, state.getRight().get());
+	}
+
+	private Iterable<BlockPos> iterateAround(BlockPos pos) {
+		return () -> {
+			return new AbstractIterator<BlockPos>() {
+				int i = -1;
+				protected BlockPos computeNext() {
+					i++;
+					return i == 9 ? endOfData() : new BlockPos(pos.getX() + i % 3 - 1, pos.getY(), pos.getZ() + i / 3 - 1);
+				}
+			};
+		};
 	}
 
 	public static class FallingActionBlockEntityRenderer extends EntityRenderer<FallingActionBlockEntity> {
