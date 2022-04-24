@@ -19,9 +19,8 @@ public class MixinTrackedEntityInstance {
 
 	@Inject(method = "method_2182", at = @At("HEAD"), cancellable = true)
 	private void method_2182(CallbackInfoReturnable<Packet<?>> callback) {
-		Integer i = SimpleRegistry.ENTITY_TO_ID.get(trackedEntity.getClass());
-		if (!trackedEntity.removed && i != null)
-			callback.setReturnValue(new EntitySpawnS2CPacket(
-					this.trackedEntity, i, SimpleRegistry.ENTITY_TO_SERIALIZER.get(trackedEntity.getClass()).serialize(trackedEntity)));
+		EntitySpawnS2CPacket packet = SimpleRegistry.serialize(trackedEntity);
+		if (!trackedEntity.removed && packet != null)
+			callback.setReturnValue(packet);
 	}
 }

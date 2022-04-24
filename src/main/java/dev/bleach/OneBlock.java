@@ -34,9 +34,8 @@ public class OneBlock implements ModInitializer {
 		SimpleRegistry.registerEntity(101, FallingActionBlockEntity.class,
 				new FallingActionBlockEntityRenderer(MinecraftClient.getInstance().getEntityRenderManager()),
 				e -> {
-					FallingActionBlockEntity fe = (FallingActionBlockEntity) e;
-					ItemStack item = fe.tileEntityData == null ? null : ItemStack.fromNbt(fe.tileEntityData.getCompound("ItemStack"));
-					return Block.getByBlockState(fe.getBlockState()) | (item == null ? 0 : (Item.getRawId(item.getItem()) << 16));
+					ItemStack item = e.tileEntityData == null ? null : ItemStack.fromNbt(e.tileEntityData.getCompound("ItemStack"));
+					return Block.getByBlockState(e.getBlockState()) | (item == null ? 0 : (Item.getRawId(item.getItem()) << 16));
 				},
 				(w, x, y, z, d) -> {
 					FallingActionBlockEntity fe = new FallingActionBlockEntity(w, x, y, z, Block.getStateFromRawId(d & 0xffff));

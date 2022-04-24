@@ -8,7 +8,6 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.At.Shift;
 
 import dev.bleach.SimpleRegistry;
-import dev.bleach.SimpleRegistry.EntityDeserializer;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.world.ClientWorld;
@@ -34,10 +33,6 @@ public class MixinClientPlayNetworkHandler {
 
 	@ModifyVariable(method = "onEntitySpawn", at = @At(value = "CONSTANT", args = "nullValue=true", shift = Shift.BY, ordinal = 0, by = 2))
 	public Entity onEntitySpawn(Entity entity, EntitySpawnS2CPacket packet) {
-		EntityDeserializer d = SimpleRegistry.ID_TO_DESERIALIZER.get(packet.getEntityData());
-		if (d != null)
-			return d.deserialize(clientWorld, packet.getX() / 32d, packet.getY() / 32d, packet.getZ() / 32d, packet.getDataId());
-
-		return null;
+		return SimpleRegistry.deserialize(clientWorld, packet);
 	}
 }
