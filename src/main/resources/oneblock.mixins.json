@@ -12,6 +12,7 @@
   	"registry.MixinClientPlayNetworkHandler",
   	"registry.MixinTrackedEntityInstance",
   	
+  	"MixinBlock",
   	"MixinChestBlock",
     "MixinHeldItemRenderer",
     "MixinHungerManager",
