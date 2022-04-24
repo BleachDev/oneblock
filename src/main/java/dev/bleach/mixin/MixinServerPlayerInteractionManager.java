@@ -40,7 +40,10 @@ public class MixinServerPlayerInteractionManager {
 		boolean bl = this.tryBreakBlock(pos);
 		this.player.networkHandler.sendPacket(new BlockUpdateS2CPacket(this.world, pos));
 		if (item != null) {
-			if (player.getMainHandStack() != null) {
+			if (player.getMainHandStack() != null)
+				player.getMainHandStack().onBlockBroken(this.world, state.getBlock(), pos, this.player);
+
+			if (player.getMainHandStack() != null && player.getMainHandStack().count != 0) {
 				Random random = new Random();
 				Entity e = FallingActionBlockEntity.create(
 						world, player.getMainHandStack(), player.x, player.y + player.getEyeHeight(), player.z,
