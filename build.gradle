@@ -15,11 +15,6 @@ repositories {
 		name = "legacy-fabric"
 		url = "https://maven.legacyfabric.net"
 	}
-	
-	maven {
-		name = "bleachhack"
-		url = "https://bleachhack.org/maven"
-	}
 }
 
 loom {
