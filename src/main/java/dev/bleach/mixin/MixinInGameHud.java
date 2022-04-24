@@ -12,7 +12,7 @@ import net.minecraft.client.gui.hud.InGameHud;
 import net.minecraft.client.util.Window;
 import net.minecraft.entity.attribute.EntityAttributeInstance;
 import net.minecraft.entity.attribute.EntityAttributes;
-import net.minecraft.entity.effect.StatusEffect;
+import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.MathHelper;
 
@@ -52,9 +52,9 @@ public class MixinInGameHud extends DrawableHelper {
 			
 			for (int u = MathHelper.ceil((maxHealth + absorption) / 2.0F) - 1; u >= 0; --u) {
 				int v = 16;
-				if (player.hasStatusEffect(StatusEffect.POISON)) {
+				if (player.hasStatusEffect(StatusEffects.POISON)) {
 					v += 36;
-				} else if (player.hasStatusEffect(StatusEffect.WITHER)) {
+				} else if (player.hasStatusEffect(StatusEffects.WITHER)) {
 					v += 72;
 				}
 

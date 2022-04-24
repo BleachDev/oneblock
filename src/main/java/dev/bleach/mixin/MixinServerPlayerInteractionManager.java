@@ -17,6 +17,7 @@ import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.packet.s2c.play.BlockUpdateS2CPacket;
 import net.minecraft.server.network.ServerPlayerInteractionManager;
+import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
@@ -40,13 +41,13 @@ public class MixinServerPlayerInteractionManager {
 		boolean bl = this.tryBreakBlock(pos);
 		this.player.networkHandler.sendPacket(new BlockUpdateS2CPacket(this.world, pos));
 		if (item != null) {
-			if (player.getMainHandStack() != null)
-				player.getMainHandStack().onBlockBroken(this.world, state.getBlock(), pos, this.player);
+			if (player.getStackInHand(Hand.MAIN_HAND) != null)
+				player.getStackInHand(Hand.MAIN_HAND).method_11306(this.world, state, pos, this.player);
 
-			if (player.getMainHandStack() != null && player.getMainHandStack().count != 0) {
+			if (player.getStackInHand(Hand.MAIN_HAND) != null && player.getStackInHand(Hand.MAIN_HAND).getCount() != 0) {
 				Random random = new Random();
 				Entity e = FallingActionBlockEntity.create(
-						world, player.getMainHandStack(), player.x, player.y + player.getEyeHeight(), player.z,
+						world, player.getStackInHand(Hand.MAIN_HAND), player.x, player.y + player.getEyeHeight(), player.z,
 						(random.nextDouble() - 0.5) * 0.5, 0.1, (random.nextDouble() - 0.5) * 0.5);
 
 				world.spawnEntity(e);

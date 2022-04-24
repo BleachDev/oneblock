@@ -14,6 +14,7 @@ import net.minecraft.block.entity.LockableScreenHandlerFactory;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
@@ -21,21 +22,21 @@ import net.minecraft.world.World;
 @Mixin(ChestBlock.class)
 public class MixinChestBlock {
 
-	@Shadow public LockableScreenHandlerFactory method_8702(World world, BlockPos blockPos) { return null; }
+	@Shadow public LockableScreenHandlerFactory method_8702(World world, BlockPos blockPos, boolean bl) { return null; }
 
 	@Overwrite
-	public boolean onUse(World world, BlockPos pos, BlockState state, PlayerEntity player, Direction direction, float f, float g, float h) {
+	public boolean use(World world, BlockPos pos, BlockState state, PlayerEntity player, Hand hand, Direction direction, float f, float g, float h) {
 		if (world.isClient)
 			return true;
 
-		LockableScreenHandlerFactory inventory = method_8702(world, pos);
+		LockableScreenHandlerFactory inventory = method_8702(world, pos, true);
 		if (OneBlock.cheatCodeEnabled()) {
 			player.openInventory(inventory);
 		} else {
 			Random random = new Random();
 			for (int slot = 0; slot < inventory.getInvSize(); slot++) {
 				ItemStack stack = inventory.getInvStack(slot);
-				if (stack == null || stack.count < 1)
+				if (stack == null || stack.getCount() < 1)
 					continue;
 
 				Entity entity = FallingActionBlockEntity.create(

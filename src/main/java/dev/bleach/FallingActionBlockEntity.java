@@ -19,6 +19,7 @@ import net.minecraft.block.StoneSlabBlock.SlabType;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.render.entity.EntityRenderDispatcher;
 import net.minecraft.client.render.entity.EntityRenderer;
+import net.minecraft.client.sound.SoundCategory;
 import net.minecraft.client.texture.SpriteAtlasTexture;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.FallingBlockEntity;
@@ -52,7 +53,7 @@ public class FallingActionBlockEntity extends FallingBlockEntity {
 
 		if (state.getRight() != null) {
 			NbtCompound nbt = new NbtCompound();
-			state.getRight().get().toNbt(nbt);
+			state.getRight().get().method_541(nbt);
 			entity.tileEntityData = nbt;
 		}
 
@@ -75,7 +76,7 @@ public class FallingActionBlockEntity extends FallingBlockEntity {
 					e.addVelocity(velocityX * 0.5, velocityY * 0.5, velocityZ * 0.5);
 
 					if (e instanceof PlayerEntity) {
-						e.getArmorStacks()[3] = OneBlock.stackFromBlock(getBlockState(), tileEntityData);
+						((PlayerEntity) e).inventory.field_15083.set(3, OneBlock.stackFromBlock(getBlockState(), tileEntityData));
 						remove();
 						return;
 					}
@@ -94,9 +95,9 @@ public class FallingActionBlockEntity extends FallingBlockEntity {
 			if (block == Blocks.CRAFTING_TABLE) {
 				for (Direction d: HORIZONTAL) {
 					ItemStack stack = RecipeHelper.getBlockRecipe(world, pos, d);
-					if (stack != null) {
+					if (stack.getCount() != 0) {
 						for (BlockPos p: iterateAround(pos)) {
-							if (!world.getBlockState(p).getBlock().getMaterial().isReplaceable())
+							if (!world.getBlockState(p).getBlock().getMaterial(getBlockState()).isReplaceable())
 								replaceBlock(world, p, OneBlock.stateFromStack(world, stack));
 						}
 
@@ -110,7 +111,7 @@ public class FallingActionBlockEntity extends FallingBlockEntity {
 				}
 			} else if ((block instanceof GlassBlock || block instanceof StainedGlassBlock || block instanceof PaneBlock) && ThreadLocalRandom.current().nextBoolean()) {
 				world.setBlockState(getBlockPos(), Blocks.AIR.getDefaultState());
-				world.playSound(pos.getX(), pos.getY(), pos.getZ(), block.sound.getSound(), 1f, 1f);
+				world.playSound(pos.getX(), pos.getY(), pos.getZ(), block.getSoundGroup().method_11629(), SoundCategory.MASTER, 1f, 1f, true);
 			} else if (block == Blocks.GRAVEL) {
 				for (BlockPos p: iterateAround(getBlockPos())) {
 					Block b = world.getBlockState(p).getBlock();
@@ -133,7 +134,7 @@ public class FallingActionBlockEntity extends FallingBlockEntity {
 	@Override
 	public ItemEntity dropItem(ItemStack stack, float yOffset) {
 		if (getBlockState().getBlock() == ItemBlock.BLOCK && tileEntityData != null) {
-			ItemStack nbtStack = ItemStack.fromNbt(tileEntityData.getCompound("ItemStack"));
+			ItemStack nbtStack = new ItemStack(tileEntityData.getCompound("ItemStack"));
 			ItemEntity entity = new ItemEntity(this.world, this.x, this.y + (double)yOffset, this.z, nbtStack);
 			entity.setToDefaultPickupDelay();
 			this.world.spawnEntity(entity);
@@ -171,7 +172,7 @@ public class FallingActionBlockEntity extends FallingBlockEntity {
 		@Override
 		public void render(FallingActionBlockEntity fallingBlockEntity, double d, double e, double f, float g, float h) {
 			if (fallingBlockEntity.getBlockState().getBlock() == ItemBlock.BLOCK && fallingBlockEntity.tileEntityData != null) {
-				ItemStack stack = ItemStack.fromNbt(fallingBlockEntity.tileEntityData.getCompound("ItemStack"));
+				ItemStack stack = new ItemStack(fallingBlockEntity.tileEntityData.getCompound("ItemStack"));
 				if (stack != null)
 					ItemBlockEntityRenderer.renderItem(stack, d, e, f, (System.currentTimeMillis() / 5L) % 360, h);
 

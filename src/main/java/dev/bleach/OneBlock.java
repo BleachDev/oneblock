@@ -34,7 +34,7 @@ public class OneBlock implements ModInitializer {
 		SimpleRegistry.registerEntity(101, FallingActionBlockEntity.class,
 				new FallingActionBlockEntityRenderer(MinecraftClient.getInstance().getEntityRenderManager()),
 				e -> {
-					ItemStack item = e.tileEntityData == null ? null : ItemStack.fromNbt(e.tileEntityData.getCompound("ItemStack"));
+					ItemStack item = e.tileEntityData == null ? null : new ItemStack(e.tileEntityData.getCompound("ItemStack"));
 					return Block.getByBlockState(e.getBlockState()) | (item == null ? 0 : (Item.getRawId(item.getItem()) << 16));
 				},
 				(w, x, y, z, d) -> {
@@ -80,7 +80,7 @@ public class OneBlock implements ModInitializer {
 
 	public static ItemStack stackFromBlock(BlockState state, NbtCompound blockEntityData) {
 		if (state.getBlock() == ItemBlock.BLOCK && blockEntityData != null)
-			return ItemStack.fromNbt(blockEntityData.getCompound("ItemStack"));
+			return new ItemStack(blockEntityData.getCompound("ItemStack"));
 
 		return stackFromBlock(state);
 	}
@@ -88,7 +88,7 @@ public class OneBlock implements ModInitializer {
 	public static ItemStack stackFromBlock(BlockState state, BlockEntity blockEntity) {
 		NbtCompound nbt = new NbtCompound();
 		if (blockEntity != null)
-			blockEntity.toNbt(nbt);
+			blockEntity.method_541(nbt);
 
 		return stackFromBlock(state, nbt);
 	}

@@ -24,7 +24,7 @@ public class RecipeHelper {
 				BlockPos newPos = pos.offset(direction, x).offset(direction.rotateYClockwise(), y);
 				BlockState state = world.getBlockState(newPos);
 
-				if (!state.getBlock().getMaterial().isReplaceable())
+				if (!state.getBlock().getMaterial(state).isReplaceable())
 					items[(y + 1) * 3 + (x + 1)] = OneBlock.stackFromBlock(world.getBlockState(newPos), world.getBlockEntity(newPos));
 			}
 		}
@@ -34,9 +34,9 @@ public class RecipeHelper {
 	
 	public static ItemStack getRecipe(World world, ItemStack... items) {
 		for (int i = 0; i < items.length; i++)
-			TEST_INV.setInvStack(i, items[i]);
+			TEST_INV.setInvStack(i, items[i] == null ? ItemStack.EMPTY : items[i]);
 
-		return RecipeDispatcher.getInstance().matches(TEST_INV, world);
+		return RecipeDispatcher.matches(TEST_INV, world);
 	}
 	
 	public static ItemStack getFurnaceBlockRecipe(World world, BlockPos pos) {

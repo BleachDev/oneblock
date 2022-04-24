@@ -27,25 +27,23 @@ public abstract class MixinPlayerEntity extends LivingEntity {
 	public void method_3216(Entity entity) {
 		if (entity.isAttackable()) {
 			Entity r = this;
-			while (r.rider != null) {
-				if (r.rider == entity) {
-					r = null;
-					break;
+			while (!r.getPassengerList().isEmpty()) {
+				r = r.getPassengerList().get(0);
+				
+				if (r == entity) {
+					r.stopRiding();
+					return;
 				}
-
-				r = r.rider;
 			}
 
-			entity.startRiding(r);
+			entity.startRiding(r, true);
 		}
 	}
 
 	// Make riding entities a bit higher so they don't block your entire view
 	@Override
-	public void updatePassengerPosition() {
-		if (this.rider != null) {
-			this.rider.updatePosition(this.x, this.y + this.height, this.z);
-		}
+	public double getMountedHeightOffset() {
+		return height;
 	}
 
 	@Inject(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LivingEntity;tick()V", shift = Shift.BEFORE))
@@ -56,7 +54,9 @@ public abstract class MixinPlayerEntity extends LivingEntity {
 	}
 
 	private boolean isAnyRider(Predicate<Entity> func) {
-		for (Entity r = rider; r != null; r = r.rider) {
+		Entity r = this;
+		while (!r.getPassengerList().isEmpty()) {
+			r = r.getPassengerList().get(0);
 			if (func.test(r)) {
 				return true;
 			}

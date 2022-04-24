@@ -8,5 +8,5 @@ import net.minecraft.block.entity.BlockEntity;
 @Mixin(BlockEntity.class)
 public interface AccessorBlockEntity {
 	
-	@Invoker public static void callRegisterBlockEntity(Class<? extends BlockEntity> clazz, String stringId) {}
+	@Invoker public static void callAddBlockEntity(String identifier, Class<? extends BlockEntity> clazz) {}
 }

@@ -23,7 +23,7 @@ public class SimpleRegistry {
 	private static final Map<Class<? extends Entity>, Integer> ENTITY_TO_ID = new HashMap<>();
 	private static final Map<Class<? extends Entity>, EntitySerializer> ENTITY_TO_SERIALIZER = new HashMap<>();
 	private static final Map<Integer, EntityDeserializer> ID_TO_DESERIALIZER = new HashMap<>();
-	
+
 	// Registering
 
 	public static void registerBlock(int id, Identifier identifier, Block block) {
@@ -36,7 +36,7 @@ public class SimpleRegistry {
 		if (renderer != null)
 			((AccessorBlockEntityRenderDispatcher) BlockEntityRenderDispatcher.INSTANCE).getRenderers().put(beClass, renderer);
 
-		AccessorBlockEntity.callRegisterBlockEntity(beClass, name);
+		AccessorBlockEntity.callAddBlockEntity(name, beClass);
 	}
 
 	public static <T extends Entity> void registerEntity(int typeId, Class<T> entityClass, EntityRenderer<T> renderer, EntitySerializer<T> entitySerializer, EntityDeserializer<T> deserializer) {
@@ -46,7 +46,7 @@ public class SimpleRegistry {
 		if (renderer != null)
 			((AccessorEntityRenderDispatcher) MinecraftClient.getInstance().getEntityRenderManager()).getRenderers().put(entityClass, renderer);
 	}
-	
+
 	// Serializing
 
 	@SuppressWarnings("unchecked")
@@ -58,9 +58,9 @@ public class SimpleRegistry {
 
 	public static Entity deserialize(ClientWorld world, EntitySpawnS2CPacket packet) {
 		EntityDeserializer dsr = ID_TO_DESERIALIZER.get(packet.getEntityData());
-		return dsr == null ? null : dsr.deserialize(world, packet.getX() / 32d, packet.getY() / 32d, packet.getZ() / 32d, packet.getDataId());
+		return dsr == null ? null : dsr.deserialize(world, packet.method_12614(), packet.method_12615(), packet.method_12616(), packet.getDataId());
 	}
-	
+
 	// Functions
 
 	@FunctionalInterface

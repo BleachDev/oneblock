@@ -22,8 +22,8 @@ public class MixinMinecraftClient {
 	}
 
 	// No slot selecting for you
-	@Redirect(method = "tick", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/player/PlayerInventory;selectedSlot:I", opcode = Opcodes.PUTFIELD))
-	public void method_8422(PlayerInventory inventory, int v) {
+	@Redirect(method = "method_12140", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/player/PlayerInventory;selectedSlot:I", opcode = Opcodes.PUTFIELD))
+	public void method_12140(PlayerInventory inventory, int v) {
 	}
 
 	@Inject(method = "openScreen", at = @At("HEAD"), cancellable = true)
